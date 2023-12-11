@@ -4,5 +4,11 @@ const {connect} = require('mongoose');
 require('dotenv').config();
 
 const app = express();
+app.use(express.json({extended: true}))
+app.use(express.urlencoded({extended: true}))
+app.use(cors({credentials: true, origin: "http://localhost:3000"}))
 
-app.listen(5000, () => console.log("Server running on port 5000"))
+
+
+connect(process.env.MONGO_URI).then(app.listen(5000, () => console.log(`Server started on port ${process.env.PORT}`))).catch(error => {console.log(error)})
+
