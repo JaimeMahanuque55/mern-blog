@@ -14,7 +14,7 @@ const loginUser = (req, res, next) => {
 }
 
 // ============ USER PROFILE
-// POST : api/users/:id
+// GET : api/users/:id
 // PROTECTED
 const getUser = (req, res, next) => {
     res.json("User Profile")
@@ -29,14 +29,14 @@ const changeAvatar = (req, res, next) => {
 
 
 // ============ EDIT USER DETAILS (From profile)
-// POST : api/users/edit-user
+// PATCH : api/users/edit-user
 // PROTECTED
 const editUser = (req, res, next) => {
     res.json("Edit User Details")
 }
 
 // ============ GET AUTHORS
-// POST : api/users/authors
+// GET : api/users/authors
 // UNPROTECTED
 const getAuthors = (req, res, next) => {
     res.json("Get all users/authors")
