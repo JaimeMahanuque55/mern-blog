@@ -6,6 +6,12 @@ const registerUser = (req, res, next) => {
 }
 
 
+
+
+
+
+
+
 // ============ LOGIN A REGISTERED USER
 // POST : api/users/login
 // UNPROTECTED
