@@ -1,8 +1,48 @@
+const bcrypt = require('bcryptjs');
+
+const HttpError = require("../models/errorModel");
+const User = require('../models/userModel');
+
+
+
+
+
 // ============ RESGISTER NEW USER
 // POST : api/users/register
 // UNPROTECTED
-const registerUser = (req, res, next) => {
-    res.json("Register User")
+const registerUser = async (req, res, next) => {
+    try {
+        const {name, email, password, confirmPassword} = req.body;
+        if(!name || !email || !password) {
+            return next(new HttpError("Fill in all fields.", 422))
+        }
+
+        const newEmail = email.toLowerCase();
+
+        const emailExists = await User.findOne({email: newEmail})
+        if(emailExists) {
+            return next(new HttpError("Email already exists.", 422))
+        }
+
+        if((password.trim()).length < 6) {
+            return next(new HttpError("Password should be at least 6 characters.", 422))
+        }
+
+        if(password != confirmPassword) {
+            return next(new HttpError("Passwords do not match.", 422))
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPass = await bcrypt.hash(password, salt);
+        const newUser = await User.create({name, email: newEmail, password: hashedPass})
+        res.status(201).json(`New user ${newUser.email} registered`)
+
+
+
+
+    } catch (error) {
+        return next(new HttpError("User registration failed.", 422))
+    }
 }
 
 
@@ -15,21 +55,21 @@ const registerUser = (req, res, next) => {
 // ============ LOGIN A REGISTERED USER
 // POST : api/users/login
 // UNPROTECTED
-const loginUser = (req, res, next) => {
+const loginUser = async (req, res, next) => {
     res.json("Login User")
 }
 
 // ============ USER PROFILE
 // GET : api/users/:id
 // PROTECTED
-const getUser = (req, res, next) => {
+const getUser = async (req, res, next) => {
     res.json("User Profile")
 }
 
 // ============ CHANGE USER AVATAR (Profile Picture)
 // POST : api/users/change-avatar
 // PROTECTED
-const changeAvatar = (req, res, next) => {
+const changeAvatar = async (req, res, next) => {
     res.json("Change User Avatar")
 }
 
@@ -37,14 +77,14 @@ const changeAvatar = (req, res, next) => {
 // ============ EDIT USER DETAILS (From profile)
 // PATCH : api/users/edit-user
 // PROTECTED
-const editUser = (req, res, next) => {
+const editUser = async (req, res, next) => {
     res.json("Edit User Details")
 }
 
 // ============ GET AUTHORS
 // GET : api/users/authors
 // UNPROTECTED
-const getAuthors = (req, res, next) => {
+const getAuthors = async (req, res, next) => {
     res.json("Get all users/authors")
 }
 
