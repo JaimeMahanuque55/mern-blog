@@ -81,7 +81,16 @@ const loginUser = async (req, res, next) => {
 // GET : api/users/:id
 // PROTECTED
 const getUser = async (req, res, next) => {
-    res.json("User Profile")
+    try {
+        const {id} = req.params;
+        const user = await User.findById(id).select('-password');
+        if(!user) {
+            return next(new HttpError("User not found.", 404))
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        return next(new HttpError(error))
+    }
 }
 
 // ============ CHANGE USER AVATAR (Profile Picture)
