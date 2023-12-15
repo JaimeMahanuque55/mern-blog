@@ -49,3 +49,5 @@ const editPost = async (req, res, next) => {
 const deletePost = async (req, res, next) => {
     res.json("Delete post")
 }
+
+module.exports = {createPost, getPosts, getPost, getCatPosts, getUserPosts, editPost, deletePost};
