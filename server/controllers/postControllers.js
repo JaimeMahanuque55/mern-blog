@@ -48,7 +48,12 @@ const createPost = async (req, res, next) => {
 // GET : api/posts
 // UNPROTECTED
 const getPosts = async (req, res, next) => {
-    res.json("Get all posts")
+    try {
+        const posts = await Post.find().sort({updatedAt: -1});
+        res.status(200).json(posts)
+    } catch (error) {
+        return next(new HttpError(error))
+    }
 }
 
 // ============================ GET SINGLE POST
