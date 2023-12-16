@@ -85,13 +85,18 @@ const getCatPosts = async (req, res, next) => {
     }
 }
 
-// ============================ GET AUTHOR POST
+// ============================ GET USER/AUTHOR POST
 // GET : api/posts/users/:id
 // UNPROTECTED
 const getUserPosts = async (req, res, next) => {
-    res.json("Get user posts")
+    try {
+        const {id} = req.params;
+        const posts = await Post.find({creator: id}).sort({createdAt: - 1});
+        res.status(200).json(posts);
+    } catch (error) {
+        return next(new HttpError(error))
+    }
 }
-
 // ============================ EDIT POST
 // PATCH : api/posts/:id
 // PROTECTED
