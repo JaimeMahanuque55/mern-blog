@@ -60,7 +60,16 @@ const getPosts = async (req, res, next) => {
 // GET : api/posts/:id
 // UNPROTECTED
 const getPost = async (req, res, next) => {
-    res.json("GET single post")
+    try {
+        const postId = req.params.id;
+        const post = await Post.findById(postId);
+        if(!post) {
+            return next(new HttpError("Post not found.", 404));
+        }
+        res.status(200).json(post);
+    } catch (error) {
+        return next(new HttpError(error))
+    }
 }
 
 // ============================ GET POSTS BY CATEGORY
