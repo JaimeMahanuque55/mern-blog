@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const {v4: uuid} = require("uuid");
 const HttpError = require("../models/errorModel");
+const { runInNewContext } = require('vm');
 
 // ============================ CREATE A POST
 // POST : api/posts
@@ -101,7 +102,52 @@ const getUserPosts = async (req, res, next) => {
 // PATCH : api/posts/:id
 // PROTECTED
 const editPost = async (req, res, next) => {
-    res.json("Edit post")
+    try {
+        let fileName;
+        let newFileName;
+        let updatedPost;
+        const postId = req.params.id;
+        let {title, category, description} = req.body;
+
+        // ReactQuill has a paragraph opening and closing tag with a break tag in between so there are 11 characters in there already.
+        if(!title || !category || description.length < 12) {
+            return next(new HttpError("Fill in all fields.", 422))
+        }
+        if(!req.files) {
+            updatedPost = await Post.findByIdAndUpdate(postId, {title, category, description}, {new: true});
+        } else {
+            // get old post from database
+            const oldPost = await Post.findById(postId);
+            // delete old thumbnail from upload
+            fs.unlink(path.join(__dirname, '..', 'uploads', oldPost.thumbnail), async (err) => {
+                if(err) {
+                    return next(new HttpError(err))
+                }
+            })
+            // upload new thumbnail
+            const {thumbnail} = req.files;
+            // check file size
+            if(thumbnail.size > 2000000) {
+                return next(new HttpError("Thumbnail too big. Should be less than 2mb"))
+            }
+            fileName = thumbnail.name;
+            let splittedFileName = fileName.split('.');
+            newFileName = splittedFileName[0] + uuid() + "." + splittedFileName[splittedFileName.length - 1];
+            thumbnail.mv(path.join(__dirname, '..', 'uploads', newFileName), async (err) => {
+                if(err) {
+                    return next(new HttpError(err))
+                }
+            })
+            updatedPost = await Post.findByIdAndUpdate(postId, {title, category, description, thumbnail: newFileName}, {new: true});
+        }
+
+        if(!updatedPost) {
+            return runInNewContext(new HttpError("Couldn't update post.", 400))
+        }
+        res.status(200).json(updatedPost);
+    } catch (error) {
+        
+    }
 }
 
 // ============================ DELETE POST
